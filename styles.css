@@ -1,0 +1,76 @@
+html * {
+  font-family: "Poppins", sans-serif;
+}
+
+.block {
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #4CAF50;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+.rectanglebuttontop {
+  height: 82px;
+  width: 316px;
+  border-radius: 0px 15px 0px 15px;
+  background-color: #F36;
+}
+.rectanglebuttontop::after {
+  content: "";
+  display: block;
+  height: 20%;
+  position: relative;
+  top: -41px;
+  left: 67px;
+  width: 80%;
+  border-radius: 0 9px 0 0;
+  background: linear-gradient(270deg, #AA1B3F 0%, #F36 100%);
+}
+.rectanglebuttonmid {
+  height: 82px;
+  width: 316px;
+  border-radius: 9px 9px 0;
+  background-color: #39F;
+}
+.rectanglebuttonmid::after {
+  content: "";
+  display: block;
+  height: 20%;
+  position: relative;
+  top: -41px;
+  left: -7px;
+  width: 80%;
+  border-radius: 9px 0 0 0;
+  background: linear-gradient(90deg, #205D9B 0%, #39F 100%);
+}
+.rectanglebuttonbottom {
+  height: 82px;
+  width: 316px;
+  border-radius: 0 9px 0 9px;
+  background-color: #FA9917;
+}
+.rectanglebuttonbottom::after {
+  content: "";
+  display: block;
+  height: 20%;
+  position: relative;
+  top: -41px;
+  left: 67px;
+  width: 80%;
+  border-radius: 0 9px 0 0;
+  background: linear-gradient(270deg, #BD7411 0%, #FA9917 100%);
+}
+.rectanglebuttonbottom::before {
+  height: 60px;
+  width: 137px;
+  color: #FFF;
+  font-family: "San Francisco Display";
+  font-size: 17px;  
+  letter-spacing: -0.53px;
+  line-height: 20px;
+  text-align: right;
+  transform: scaleX(-1);
+}
