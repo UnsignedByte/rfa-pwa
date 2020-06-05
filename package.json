@@ -1,0 +1,26 @@
+{
+  "name": "rfa-pwa",
+  "version": "1.0.0",
+  "description": "robotics for all thing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "build": "node build/build.js & rollup -c",
+    "type": "git",
+    "url": "git+https://github.com/UnsignedByte/rfa-pwa.git"
+  },
+  "keywords": [],
+  "author": "UnsignedByte",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/UnsignedByte/rfa-pwa/issues"
+  },
+  "homepage": "https://github.com/UnsignedByte/rfa-pwa#readme",
+  "dependencies": {
+    "localforage": "^1.7.4",
+    "node": "^14.4.0",
+    "rollup": "^2.13.1"
+  }
+}
