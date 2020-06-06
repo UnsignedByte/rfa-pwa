@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "robotics for all thing",
   "main": "src/build.js",
-  "type": "module",
   "scripts": {
     "build": "node src/build.js && rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,6 +22,7 @@
     "googleapis": "^39.2.0",
     "localforage": "^1.7.4",
     "node": "^14.4.0",
+    "queue-promise": "^2.0.1",
     "rollup": "^2.13.1"
   },
   "devDependencies": {
