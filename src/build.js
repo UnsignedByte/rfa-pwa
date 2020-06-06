@@ -2,13 +2,12 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 11:38:16, 06-Jun-2020
+* @Last Modified time: 11:48:13, 06-Jun-2020
 */
 
 const fs = require('fs/promises');
 const {google} = require('googleapis');
 const path = require('path');
-const Queue = require("queue-promise");
 
 const driveTools = {
 	getFolder:async (drive, id) => await drive.files.list({q:`'${id}' in parents`}),
