@@ -2,17 +2,19 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 11:48:13, 06-Jun-2020
+* @Last Modified time: 16:18:40, 06-Jun-2020
 */
 
-const fs = require('fs/promises');
+const fs = require('fs');
 const {google} = require('googleapis');
 const path = require('path');
+const {url} = require('./url.js')
+const fetch = require('node-fetch')
 
 const driveTools = {
-	getFolder:async (drive, id) => await drive.files.list({q:`'${id}' in parents`}),
-	get:async (drive, id, extra) => await drive.files.get(Object.assign({fileId:id}, extra)),
-	export:async (drive, id, mimeType) => await drive.files.export({fileId:id, mimeType:mimeType})
+	getFolder: (drive, id) => drive.files.list({q:`'${id}' in parents`}),
+	get: (drive, id, extra) => drive.files.get(Object.assign({fileId:id}, extra)),
+	export: (drive, id, mimeType) => drive.files.export({fileId:id, mimeType:mimeType})
 }
 
 /*
@@ -47,10 +49,19 @@ async function load(params){
 		}).then(val=>{return {type:'folder',data:val}})
 	}
 
+	await fetch('https://www.googleapis.com/drive/v3/files/1L3ZX-l4Kto4rIjRilwvZHKb3UQV5Cf5S?alt=media&key=AIzaSyDKKpJpMbM9kt5wjMlOGvUaOVfd0v_Qx1o').then(async val=>console.log(await val.text()));
+
 	// console.log(await driveTools.export(drive, '1nXTCJAWykZf4NSBsMpf4cjqUIU40LW2zfxxAVIA6N1A', 'application/pdf'));
-	// console.log(await drive.files.get({fileId:'1-tSjsNOktm_h7FVTXa3enLRGaJNe193x', alt:'media'}))
-	return await crawl(params.FOLDER_ID);
-	// return 
+	// let dest = fs.createWriteStream(path.resolve(__dirname, './test.mov'));
+	// await drive.files.get({fileId:'1L3ZX-l4Kto4rIjRilwvZHKb3UQV5Cf5S', alt:'media'});
+		// .on('end', function () {
+  //     console.log('Done');
+  //   })
+  //   .on('error', function (err) {
+  //     console.log('Error during download', err);
+  //   })
+  //   .pipe(dest)
+	// return await crawl(params.FOLDER_ID);
 }
 
 const urls = {
@@ -59,15 +70,15 @@ const urls = {
 	out:path.resolve(__dirname, `./data.js`)
 }
 
-fs.readFile(urls.main)
+fs.promises.readFile(urls.main)
 	.then(val => load(JSON.parse(val)).then(
-		data => fs.writeFile(urls.out, `const data = ${JSON.stringify(data)};\nexport default data`)
+		data => fs.promises.writeFile(urls.out, `const data = ${JSON.stringify(data)};\nexport default data`)
 						.then(()=>console.log("Curriculum data loaded."))
 		))
 	.catch(err => {
 		// If the file doesn't exist, throw error after creating new file
 		if (err.code === 'ENOENT') {
-			fs.readFile(urls.default).then(val=>fs.writeFile(urls.main, val))
+			fs.promises.readFile(urls.default).then(val=>fs.promises.writeFile(urls.main, val))
 			console.error(new Error(`Missing Information in params.json`))
 		} else { //Unknown error
 			console.error(err)
