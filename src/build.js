@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 16:18:40, 06-Jun-2020
+* @Last Modified time: 23:06:20, 12-Jun-2020
 */
 
 const fs = require('fs');
@@ -15,6 +15,14 @@ const driveTools = {
 	getFolder: (drive, id) => drive.files.list({q:`'${id}' in parents`}),
 	get: (drive, id, extra) => drive.files.get(Object.assign({fileId:id}, extra)),
 	export: (drive, id, mimeType) => drive.files.export({fileId:id, mimeType:mimeType})
+}
+
+function dataURI(mimeType, response){
+	switch(true){
+		case /application\/pdf/.test(mimeType):
+			return `<embed src="data:application/pdf;base64,${Buffer.from(response.data, 'utf8').toString('base64')}"/>`;
+	}
+	
 }
 
 /*
@@ -31,37 +39,33 @@ async function load(params){
 			const out = [];
 			for(const x of val.data.files){
 				console.log(`resolving ${x.mimeType} ${x.name}`);
-				switch(x.mimeType){
-					case 'application/vnd.google-apps.folder':
+				switch(true){
+					case /application\/vnd\.google-apps\.folder/.test(x.mimeType):
 						out.push(await crawl(x.id));
 						break;
-					case 'application/vnd.google-apps.document':
-					case 'application/vnd.google-apps.presentation':
-					case 'application/vnd.google-apps.spreadsheet':
-						out.push(await driveTools.export(drive, x.id, 'application/pdf').then(val=>{return {type:'application/pdf', data:val.data}}))
+					case /application\/vnd\.google-apps\.document/.test(x.mimeType):
+					case /application\/vnd\.google-apps\.presentation/.test(x.mimeType):
+					case /application\/vnd\.google-apps\.spreadsheet/.test(x.mimeType):
+						x.mimeType = 'application/pdf'
+						out.push(await driveTools.export(drive, x.id, 'application/pdf').then(val=>{return Object.assign(
+								x, {data:dataURI(x.mimeType, val), mimeType:x.mimeType}
+							)}))
+						break;
+					case /video\/.+/.test(x.mimeType): //no videos bad
+						out.push(x)
 						break;
 					default:
 						// weird filetype, just export as self
-						out.push(await driveTools.get(drive, x.id, {alt:'media'}).then(val=>{return {type:x.mimeType, data:val.data}}))
+						out.push(await driveTools.get(drive, x.id, {alt:'media'}).then(val=>{return Object.assign(
+								x, {data:dataURI(x.mimeType, val)}
+							)}))
 				}
 			}
 			return out;
 		}).then(val=>{return {type:'folder',data:val}})
 	}
 
-	await fetch('https://www.googleapis.com/drive/v3/files/1L3ZX-l4Kto4rIjRilwvZHKb3UQV5Cf5S?alt=media&key=AIzaSyDKKpJpMbM9kt5wjMlOGvUaOVfd0v_Qx1o').then(async val=>console.log(await val.text()));
-
-	// console.log(await driveTools.export(drive, '1nXTCJAWykZf4NSBsMpf4cjqUIU40LW2zfxxAVIA6N1A', 'application/pdf'));
-	// let dest = fs.createWriteStream(path.resolve(__dirname, './test.mov'));
-	// await drive.files.get({fileId:'1L3ZX-l4Kto4rIjRilwvZHKb3UQV5Cf5S', alt:'media'});
-		// .on('end', function () {
-  //     console.log('Done');
-  //   })
-  //   .on('error', function (err) {
-  //     console.log('Error during download', err);
-  //   })
-  //   .pipe(dest)
-	// return await crawl(params.FOLDER_ID);
+	return await crawl(params.FOLDER_ID);
 }
 
 const urls = {
