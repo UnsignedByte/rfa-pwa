@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 23:06:20, 12-Jun-2020
+* @Last Modified time: 13:07:08, 13-Jun-2020
 */
 
 const fs = require('fs');
@@ -18,11 +18,17 @@ const driveTools = {
 }
 
 function dataURI(mimeType, response){
+	let data = Buffer.from(response.data, 'utf8').toString('base64');
+	let ret = {download:`<a href="data:${mimeType};base64,${data}" target="_blank">`}
 	switch(true){
 		case /application\/pdf/.test(mimeType):
-			return `<embed src="data:application/pdf;base64,${Buffer.from(response.data, 'utf8').toString('base64')}"/>`;
+			ret = Object.assign(ret,{html:`<embed src="data:${mimeType};base64,${data}"/>`});
+			break;
+		case /image\/.+/.test(mimeType):
+			ret = Object.assign(ret,{html:`<img src="data:${mimeType};base64,${data}"/>`});
+			break;
 	}
-	
+	return ret;
 }
 
 /*
