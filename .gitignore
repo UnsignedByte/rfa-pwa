@@ -4,6 +4,9 @@
 # node modules
 node_modules
 
+# data file
+src/data.js
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
