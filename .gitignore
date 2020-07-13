@@ -1,10 +1,6 @@
 # ignore binaries
 *.DS_Store
 
-# hidden param files
-/params.json
-src/build/params.js
-
 # node modules
 node_modules
 
