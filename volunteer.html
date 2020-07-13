@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- CODELAB: Add link rel manifest -->
+    <link rel="manifest" href="/manifest.json" />
+ <!-- CODELAB: Add iOS meta tags and icons -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="orange">
+<meta name="apple-mobile-web-app-title" content="RfA PWA">
+<link rel="apple-touch-icon" href="https://cdn.glitch.com/4e6ac50c-00e6-4bb2-8f56-25286b2e00f2%2FRfA-152*152.png?v=1594275460340">
+    <!--Import Google Icon Font-->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body style="background-color:#c89600;">
+    <nav>
+      <div class="nav-wrapper yellow darken-2">
+        <div class="col s12">
+          <a href="index.html" class="breadcrumb waves-effect"> 🏠</a>
+          <a href="teacher.html" class="breadcrumb waves-effect"
+            >🧑‍🏫 Teacher</a
+          >
+          <a href="volunteer.html" class="breadcrumb">ℹ️ Volunteer Resources</a>
+        </div>
+      </div>
+    </nav>
+    <br />
+    <br />
+    <br />
+    <br />
+    <h2>Resources</h2>
+    <ul class="collapsible expandable" data-collapsible="accordion">
+      <li>
+        <div class="collapsible-header no-padding-bottom no-padding-top green">
+          <h5>
+            ⏱️
+          </h5>
+          <br />time logging
+        </div>
+        <div class="collapsible-body green darken-1">
+          <span class="white text"
+            >**must be logged in**
+            <a href="https://forms.gle/Mb72ZJjRdwCuVZtt7"> click here</a>
+          </span>
+        </div>
+      </li>
+      <li>
+        <div
+          class="collapsible-header active no-padding-bottom no-padding-top orange accent-3"
+        >
+          <h5>
+            🚆
+          </h5>
+          <br />
+          training (how-tos, etc)
+        </div>
+        <div class="collapsible-body orange accent-4">
+          <span>Google drive link etc</span>
+        </div>
+      </li>
+      <li>
+        <div
+          class="collapsible-header active no-padding-bottom no-padding-top orange darken-4"
+        >
+          <h5>
+            📞
+          </h5>
+          <br />Contact us for something urgent
+        </div>
+        <div class="collapsible-body deep-orange">
+          <span
+            ><a class="white-text" href="mailto:Info@roboticsforall.net"
+              >📩 email</a
+            >
+            <br /><a class="white-text" href="tel:6509999999">
+              ☎️ Phone</a
+            ></span
+          >
+        </div>
+      </li>
+    </ul>
+
+    <!--Import jQuery before materialize.js     <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfGVlOQbDohQwWMltsqibIKEg2YmeAz2I9jAayNB1ioouGcuw/viewform?embedded=true" width="640" height="1037" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+-->
+    <style>
+      .sticky-nav {
+        position: fixed;
+        top: 10;
+        z-index: 10;
+      }
+      .no-padding-bottom {
+        padding-bottom: 0px !important;
+      }
+      .no-padding-top {
+        padding-top: 0px !important;
+      }
+    </style>
+    <!--Import jQuery before materialize.js-->
+    <script
+      type="text/javascript"
+      src="https://code.jquery.com/jquery-2.1.1.min.js"
+    ></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+              <!-- nav bar pin init -->
+
+          $(document).ready(function() {
+            $("nav").addClass("sticky-nav");
+          });
+
+              <!-- init collapsible -->
+
+      $(document).ready(function(){
+        $('.collapsible').collapsible();
+      });
+    </script>
+  </body>
+
+  <footer class="page-footer yellow darken-2">
+    <div class="footer-copyright">
+      <div class="container">
+        © 2020 Robotics for All
+        <a class="grey-text text-lighten-4 right" href="#!"
+          >Made with ❤️ by Edmund Lam and William Xuan</a
+        >
+      </div>
+    </div>
+  </footer>
+</html>
