@@ -19,7 +19,7 @@ robotics for all thing
 
 Install all necessary packages using `npm install`.
 
-#### Necessary files in [/params](params/)
+#### Necessary files in the [/params/](params/) folder
 
 The following files represent the files that need to be present inside the params folder in the main directory.
 
