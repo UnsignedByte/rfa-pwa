@@ -25,7 +25,7 @@ The following files represent the files that need to be present inside the param
 
 ##### params.json
 
-The default params.json looks like
+Add a file called `params.json` in the params folder with the JSON shown below. Alternatively, run `npm run-script build` in console to have the program generate the default file for you.
 
 ```json
 {
