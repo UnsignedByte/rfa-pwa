@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/UnsignedByte/rfa-pwa#readme",
   "dependencies": {
+    "express": "^4.17.1",
     "googleapis": "^39.2.0",
-    "localforage": "^1.7.4",
     "node": "^14.4.0",
     "node-fetch": "^2.6.0",
     "rollup": "^2.13.1"

@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 22:56:33, 12-Jul-2020
+* @Last Modified time: 20:56:53, 13-Jul-2020
 */
 
 const fs = require('fs');
@@ -13,7 +13,7 @@ const fetch = require('node-fetch');
 const stream = require('stream');
 
 const urls = {
-	creds:path.resolve(__dirname, `../params/credentials.json`),
+	creds:path.resolve(__dirname, `../params/client_secret.json`),
 	main:path.resolve(__dirname, `../params/params.json`),
 	default:path.resolve(__dirname, `./params.json`),
 	out:path.resolve(__dirname, `./data.js`)
@@ -52,30 +52,10 @@ function dataURI(mimeType, response){
 	}
 	return ret;
 }
-
 /*
  * Used to load and compile the curriculum folder into JSON format
 */
 async function load(params){
-	// configure a JWT auth client
-	let client = new google.auth.JWT({
-    email: credentials.client_email,
-    key: credentials.private_key,
-    scopes: ['https://www.googleapis.com/auth/drive']
-  });
-	//authenticate request
-	client.authorize(function (err, tokens) {
-	 if (err) {
-	   console.log(err);
-	 } else {
-	   console.log("Successfully connected to service account");
-	 }
-	});
-
-	const drive = google.drive({
-		version:'v3',
-		auth:client
-	});
 
 	let crawl = async (fID) => { // crawl subitems given folder
 		return await driveTools.getFolder(drive, fID).then(async val=>{
@@ -86,38 +66,110 @@ async function load(params){
 					case /application\/vnd\.google-apps\.folder/.test(x.mimeType):
 						out.push(await crawl(x.id));
 						break;
-					case /application\/vnd\.google-apps\.document/.test(x.mimeType):
-					case /application\/vnd\.google-apps\.presentation/.test(x.mimeType):
-					case /application\/vnd\.google-apps\.spreadsheet/.test(x.mimeType):
-						x.mimeType = 'application/pdf'
-						out.push(await driveTools.export(drive, x.id, 'application/pdf').then(val=>{return Object.assign(
-								x, {data:dataURI(x.mimeType, val), mimeType:x.mimeType}
-							)}))
-						break;
-					case /video\/.+/.test(x.mimeType): //no videos bad
-						out.push(x)
-						break;
+					/*
+					 * Removed below as we now load only information and not actual data
+					 */
+					// case /application\/vnd\.google-apps\.document/.test(x.mimeType):
+					// case /application\/vnd\.google-apps\.presentation/.test(x.mimeType):
+					// case /application\/vnd\.google-apps\.spreadsheet/.test(x.mimeType):
+					// 	x.mimeType = 'application/pdf'
+					// 	out.push(await driveTools.export(drive, x.id, 'application/pdf').then(val=>{return Object.assign(
+					// 			x, {data:dataURI(x.mimeType, val), mimeType:x.mimeType}
+					// 		)}))
+					// 	break;
+					// case /video\/.+/.test(x.mimeType): //no videos bad
+					// 	out.push(x)
+					// 	break;
 					default:
+						out.push(x);
 						// weird filetype, just export as self
-						out.push(await driveTools.get(drive, x.id, {alt:'media'}).then(val=>{return Object.assign(
-								x, {data:dataURI(x.mimeType, val)}
-							)}))
+						// out.push(await driveTools.get(drive, x.id, {alt:'media'}).then(val=>{return Object.assign(
+						// 		x, {data:dataURI(x.mimeType, val)}
+						// 	)}))
 				}
 			}
 			return out;
 		}).then(val=>{return {type:'folder',data:val}})
-	}
+	};
 
-	console.log();
 
+	let oauthclient =  new google.auth.OAuth2(
+	  credentials.web.client_id,
+	  credentials.web.client_secret,
+	  credentials.web.redirect_uris[0]
+	);
+	//start the temp web server
+	let app = require('express')();
+	let authorized = false;
+	let drive = undefined;
+
+	app.get('/', (req, res) => {
+    if (!authorized) {
+      // Generate an OAuth URL and redirect there
+      const url = oauthclient.generateAuthUrl({
+        scope: 'https://www.googleapis.com/auth/drive'
+      });
+      console.log(`Authorization url ${url} generated.`);
+      //redirect user to auth url
+      res.redirect(url);
+    } else {
+      res.send('Logged in. Loading curriculum. Progress will be sent to console.')
+			drive = google.drive({
+				version:'v3',
+				auth:oauthclient
+			});
+			crawl(params.FOLDER_ID).then(data => {
+			let outstream = fs.createWriteStream(urls.out);
+				outstream.write('const data = ');
+				jsonStreamStringify(data, outstream);
+				outstream.write(';\nexport default data');
+			})
+    }
+	});
+
+	app.get('/auth/google/callback', function (req, res) {
+		//get the oauth code
+    const code = req.query.code
+    console.log(code);
+    if (code) {
+      // Get an access token from oauth code
+      oauthclient.getToken(code, function (err, tokens) {
+        if (err) {
+          console.log('Error Authenticating')
+          console.log(err);
+        } else {
+					console.log('Authenticated Successfully');
+					oauthclient.setCredentials(tokens);
+					authorized = true;
+					res.redirect('/')
+        }
+      });
+	  }
+	});
+
+	let listener = app.listen(8000, ()=>{ // listen on port 8000
+		console.log('Listening on port ' + listener.address().port);
+	});
+
+	// configure a JWT auth client
+	// let client = new google.auth.JWT({
+ //    email: credentials.client_email,
+ //    key: credentials.private_key,
+ //    scopes: ['https://www.googleapis.com/auth/drive']
+ //  });
+	//authenticate request
+	// client.authorize(function (err, tokens) {
+	//  if (err) {
+	//    console.log(err);
+	//  } else {
+	//    console.log("Successfully connected to service account");
+	//  }
+	// });
 	// await drive.files.get('1CU8zNVdgEIPaY1Bg1Qliebwtq9hjix27CqCCyZTt5Tw')
-
-	return await crawl(params.FOLDER_ID);
 }
 
 // Recursive JSON stringify with streams
 function jsonStreamStringify(obj, stream) {
-	console.log(obj);
 	switch(true) {
 		case Array.isArray(obj): //if array
 			stream.write("[");
@@ -137,18 +189,16 @@ function jsonStreamStringify(obj, stream) {
 			}
 			stream.write("}");
 			break;
+		case obj === undefined: //json stringify returns undefined if run on undefined
+			stream.write("null");
+			break;
 		default: //just stringify everything else
 			stream.write(JSON.stringify(obj));
 	}
 }
 
 fs.promises.readFile(urls.main)
-	.then(val => load(JSON.parse(val)).then(data => {
-		let outstream = fs.createWriteStream(urls.out);
-		outstream.write('const data = ');
-		jsonStreamStringify(data, urls.out);
-		outstream.write(';\nexport default data');
-	}))
+	.then(val => load(JSON.parse(val)))
 		// data => fs.promises.writeFile(urls.out, `const data = ${JSON.stringify(data)};\nexport default data`)
 		// 				.then(()=>console.log("Curriculum data loaded."))
 		// ))
