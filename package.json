@@ -24,7 +24,7 @@
     "googleapis": "^39.2.0",
     "node": "^14.4.0",
     "node-fetch": "^2.6.0",
-    "rollup": "^2.13.1"
+    "rollup": "^2.21.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^8.0.1",

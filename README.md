@@ -13,11 +13,17 @@ robotics for all thing
 
 ## Instructions to work on backend
 
-### Necessary files in [/params](params/)
+### Setup
+
+[node.js](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/get-npm) need to be installed.
+
+Install all necessary packages using `npm install`.
+
+#### Necessary files in [/params](params/)
 
 The following files represent the files that need to be present inside the params folder in the main directory.
 
-#### params.json
+##### params.json
 
 The default params.json looks like
 
@@ -29,7 +35,7 @@ The default params.json looks like
 
 The only requirement here is to place in the ID of the curriculum folder, which can be found on the drive of the `app@roboticsforall.net` account. This can be found easily by opening the curriculum folder, and when inside, the url should be of the form `https://drive.google.com/drive/folders/<Folder ID>` where the area represented by the angular brackets represents the folder ID. Simply copy this and replace `ID OF CURRICULUM FOLDER` with this text. Remember not to leave the surrounding quotations.
 
-#### client_secret.json
+##### client_secret.json
 
 This can be obtained from google console. First, go to [console.cloud.google.com](https://console.cloud.google.com/) and log in with `app@roboticsforall.net`. Under the **Select a project** dropdown, choose `Curriculum-Access-API`
 
@@ -42,3 +48,7 @@ Under the `OAuth 2.0 Client IDs` tab there will be a client ID for the `Curricul
 ![Download Client ID](readme_images/client_secret.png)
 
 Download the file and rename it to `client_secret.json`. Then, place the renamed file into the `params` folder.
+
+### Building the app
+
+Run `npm build` or `npm run-script build` to build the app.
