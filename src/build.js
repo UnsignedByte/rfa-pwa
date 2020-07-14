@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 20:58:50, 13-Jul-2020
+* @Last Modified time: 21:26:05, 13-Jul-2020
 */
 
 const fs = require('fs');
@@ -11,6 +11,7 @@ const path = require('path');
 const {url} = require('./url.js');
 const fetch = require('node-fetch');
 const stream = require('stream');
+const colors = require('colors');
 
 const urls = {
 	creds:path.resolve(__dirname, `../params/client_secret.json`),
@@ -36,7 +37,6 @@ const driveTools = {
 							}
 					)
 	}
-	
 }
 
 function dataURI(mimeType, response){
@@ -56,12 +56,11 @@ function dataURI(mimeType, response){
  * Used to load and compile the curriculum folder into JSON format
 */
 async function load(params){
-
 	let crawl = async (fID) => { // crawl subitems given folder
 		return await driveTools.getFolder(drive, fID).then(async val=>{
 			const out = [];
 			for(const x of val.data.files){
-				console.log(`resolving ${x.mimeType} ${x.name} (${x.id})`);
+				console.log(`resolving ${x.mimeType.green} ${x.name.cyan} ${`(${x.id})`.grey}`);
 				switch(true){
 					case /application\/vnd\.google-apps\.folder/.test(x.mimeType):
 						out.push(await crawl(x.id));
@@ -103,26 +102,32 @@ async function load(params){
 	let authorized = false;
 	let drive = undefined;
 
+	let listener = app.listen(8000, ()=>{ // listen on port 8000
+		console.log(`Visit ${('localhost:'+listener.address().port).cyan} to authorize the app.`);
+	});
+
 	app.get('/', (req, res) => {
     if (!authorized) {
       // Generate an OAuth URL and redirect there
       const url = oauthclient.generateAuthUrl({
         scope: 'https://www.googleapis.com/auth/drive'
       });
-      console.log(`Authorization url ${url} generated.`);
+      console.log(`Authorization url ${url.cyan} generated.`);
       //redirect user to auth url
       res.redirect(url);
     } else {
-      res.send('Logged in. Loading curriculum. Progress will be sent to console.')
+      res.send('Logged in and loading curriculum. Progress will be sent to console.')
 			drive = google.drive({
 				version:'v3',
 				auth:oauthclient
 			});
 			crawl(params.FOLDER_ID).then(data => {
-			let outstream = fs.createWriteStream(urls.out);
+				console.log('Curriculum loaded.'.magenta);
+				let outstream = fs.createWriteStream(urls.out);
 				outstream.write('const data = ');
 				jsonStreamStringify(data, outstream);
 				outstream.write(';\nexport default data');
+				listener.close();
 			})
     }
 	});
@@ -130,26 +135,20 @@ async function load(params){
 	app.get('/auth/google/callback', function (req, res) {
 		//get the oauth code
     const code = req.query.code
-    console.log(code);
     if (code) {
       // Get an access token from oauth code
       oauthclient.getToken(code, function (err, tokens) {
         if (err) {
-          console.log('Error Authenticating')
+          console.log('Error Authenticating'.red)
           console.log(err);
         } else {
-					console.log('Authenticated Successfully');
+					console.log('Authenticated Successfully'.magenta);
 					oauthclient.setCredentials(tokens);
 					authorized = true;
 					res.redirect('/')
         }
       });
 	  }
-	});
-
-	let listener = app.listen(8000, ()=>{ // listen on port 8000
-		console.log('Listening on port ' + listener.address().port);
-		console.log(`Visit localhost:${listener.address().port)} to authorize the app.`;
 	});
 
 	// configure a JWT auth client
@@ -166,7 +165,7 @@ async function load(params){
 	//    console.log("Successfully connected to service account");
 	//  }
 	// });
-	// await drive.files.get('1CU8zNVdgEIPaY1Bg1Qliebwtq9hjix27CqCCyZTt5Tw')
+	// await drive.files.get('1CU8zNVdgEIPaY1Bg1Qliebwtq9hjix27CqCCyZTt5Tw');
 }
 
 // Recursive JSON stringify with streams
