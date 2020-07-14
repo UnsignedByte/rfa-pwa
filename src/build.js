@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 20:56:53, 13-Jul-2020
+* @Last Modified time: 20:58:50, 13-Jul-2020
 */
 
 const fs = require('fs');
@@ -149,6 +149,7 @@ async function load(params){
 
 	let listener = app.listen(8000, ()=>{ // listen on port 8000
 		console.log('Listening on port ' + listener.address().port);
+		console.log(`Visit localhost:${listener.address().port)} to authorize the app.`;
 	});
 
 	// configure a JWT auth client
