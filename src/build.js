@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 21:26:05, 13-Jul-2020
+* @Last Modified time: 21:37:43, 13-Jul-2020
 */
 
 const fs = require('fs');
@@ -92,10 +92,10 @@ async function load(params){
 	};
 
 
-	let oauthclient =  new google.auth.OAuth2(
-	  credentials.web.client_id,
-	  credentials.web.client_secret,
-	  credentials.web.redirect_uris[0]
+	let oauthclient = new google.auth.OAuth2(
+		credentials.web.client_id,
+		credentials.web.client_secret,
+		credentials.web.redirect_uris[0]
 	);
 	//start the temp web server
 	let app = require('express')();
@@ -107,16 +107,16 @@ async function load(params){
 	});
 
 	app.get('/', (req, res) => {
-    if (!authorized) {
-      // Generate an OAuth URL and redirect there
-      const url = oauthclient.generateAuthUrl({
-        scope: 'https://www.googleapis.com/auth/drive'
-      });
-      console.log(`Authorization url ${url.cyan} generated.`);
-      //redirect user to auth url
-      res.redirect(url);
-    } else {
-      res.send('Logged in and loading curriculum. Progress will be sent to console.')
+		if (!authorized) {
+			// Generate an OAuth URL and redirect there
+			const url = oauthclient.generateAuthUrl({
+				scope: 'https://www.googleapis.com/auth/drive'
+			});
+			console.log(`Authorization url ${url.cyan} generated.`);
+			//redirect user to auth url
+			res.redirect(url);
+		} else {
+			res.send('Logged in and loading curriculum. Progress will be sent to console.')
 			drive = google.drive({
 				version:'v3',
 				auth:oauthclient
@@ -129,41 +129,41 @@ async function load(params){
 				outstream.write(';\nexport default data');
 				listener.close();
 			})
-    }
+		}
 	});
 
 	app.get('/auth/google/callback', function (req, res) {
 		//get the oauth code
-    const code = req.query.code
-    if (code) {
-      // Get an access token from oauth code
-      oauthclient.getToken(code, function (err, tokens) {
-        if (err) {
-          console.log('Error Authenticating'.red)
-          console.log(err);
-        } else {
+		const code = req.query.code
+		if (code) {
+			// Get an access token from oauth code
+			oauthclient.getToken(code, function (err, tokens) {
+				if (err) {
+					console.log('Error Authenticating'.red)
+					console.log(err);
+				} else {
 					console.log('Authenticated Successfully'.magenta);
 					oauthclient.setCredentials(tokens);
 					authorized = true;
 					res.redirect('/')
-        }
-      });
-	  }
+				}
+			});
+		}
 	});
 
 	// configure a JWT auth client
 	// let client = new google.auth.JWT({
- //    email: credentials.client_email,
- //    key: credentials.private_key,
- //    scopes: ['https://www.googleapis.com/auth/drive']
- //  });
+ //		email: credentials.client_email,
+ //		key: credentials.private_key,
+ //		scopes: ['https://www.googleapis.com/auth/drive']
+ //	});
 	//authenticate request
 	// client.authorize(function (err, tokens) {
-	//  if (err) {
-	//    console.log(err);
-	//  } else {
-	//    console.log("Successfully connected to service account");
-	//  }
+	//	if (err) {
+	//		console.log(err);
+	//	} else {
+	//		console.log("Successfully connected to service account");
+	//	}
 	// });
 	// await drive.files.get('1CU8zNVdgEIPaY1Bg1Qliebwtq9hjix27CqCCyZTt5Tw');
 }
@@ -200,7 +200,7 @@ function jsonStreamStringify(obj, stream) {
 fs.promises.readFile(urls.main)
 	.then(val => load(JSON.parse(val)))
 		// data => fs.promises.writeFile(urls.out, `const data = ${JSON.stringify(data)};\nexport default data`)
-		// 				.then(()=>console.log("Curriculum data loaded."))
+		// 			.then(()=>console.log("Curriculum data loaded."))
 		// ))
 	.catch(err => {
 		// If the file doesn't exist, throw error after creating new file
