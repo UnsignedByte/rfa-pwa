@@ -2,16 +2,19 @@
 * @Author: UnsignedByte
 * @Date:   15:43:02, 05-Jun-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 21:37:43, 13-Jul-2020
+* @Last Modified time: 01:55:59, 15-Jul-2020
 */
 
 const fs = require('fs');
 const {google} = require('googleapis');
 const path = require('path');
-const {url} = require('./url.js');
 const fetch = require('node-fetch');
 const stream = require('stream');
 const colors = require('colors');
+
+function url(url, params){
+	return `${url}?${new URLSearchParams(params)}`
+}
 
 const urls = {
 	creds:path.resolve(__dirname, `../params/client_secret.json`),
@@ -63,7 +66,7 @@ async function load(params){
 				console.log(`resolving ${x.mimeType.green} ${x.name.cyan} ${`(${x.id})`.grey}`);
 				switch(true){
 					case /application\/vnd\.google-apps\.folder/.test(x.mimeType):
-						out.push(await crawl(x.id));
+						out.push(Object.assign(x, {data:await crawl(x.id)}));
 						break;
 					/*
 					 * Removed below as we now load only information and not actual data
@@ -88,7 +91,7 @@ async function load(params){
 				}
 			}
 			return out;
-		}).then(val=>{return {type:'folder',data:val}})
+		})
 	};
 
 
@@ -123,6 +126,7 @@ async function load(params){
 			});
 			crawl(params.FOLDER_ID).then(data => {
 				console.log('Curriculum loaded.'.magenta);
+				console.log(data);
 				let outstream = fs.createWriteStream(urls.out);
 				outstream.write('const data = ');
 				jsonStreamStringify(data, outstream);
