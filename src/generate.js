@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   18:42:12, 14-Jul-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 13:05:51, 16-Jul-2020
+* @Last Modified time: 15:46:58, 16-Jul-2020
 */
 
 // File used to generate the curriculum
@@ -10,8 +10,7 @@ import * as jQuery from 'jquery';
 import {random} from './utils.js'
 
 // possible colors
-const palette = ["blue", "light-green", "red", "green", "pink", "yellow", "purple"]
-
+const palette = ["amber", "deep-orange", "purple", "teal", "light-blue"]
 // Flatten subfolders by outputting paths
 function flatten(dat) {
 	const flattenRecursive = (data) => {
@@ -37,11 +36,13 @@ function flatten(dat) {
 // Generate all
 export default function generate(data){
 	const container = $('<div/>', {id: "curriculae", "class": "row"});
+	let colorI = 0;
 	for (const curriculum of data) {
 		// ignore file if it isnt a curriculum folder
 		if (curriculum.mimeType !== 'application/vnd.google-apps.folder') continue;
 
-		let color = random.choice(palette); // choose a random color
+		let color = palette[colorI%palette.length]; // choose a random color
+		colorI++;
 		const card = $('<div/>', {class:`card col s12 ${color} lighten-4`}).appendTo(container); // create a card
 		$('<h4/>').text(curriculum.name)
 			.appendTo($('<div/>', {class:'card-content'})
@@ -60,7 +61,7 @@ export default function generate(data){
 
 			const daycard = $('<div/>', {id:id}).appendTo(content);
 			$('<h4/>', {class:'col s12'}).text(day.name).appendTo($('<div/>', {class:'row'})
-				.css('margin-bottom', '0px'))
+				.css('margin-bottom', '0px').appendTo(daycard))
 				.prepend(
 					$('<i/>', {class:'material-icons left col s1'})
 						.css('margin-top', '10px')
@@ -69,9 +70,9 @@ export default function generate(data){
 					$('<i/>', {class:'material-icons right col s1'})
 						.css('margin-top', '14px').css('margin-right', '-7px')
 						.text('cloud_download')
-				).appendTo(daycard);
+				);
 			$('<div/>', {class:'divider'}).appendTo(daycard);
-			$('br').appendTo(daycard);
+			$('<br/>').appendTo(daycard);
 			flatten(day).map(x=>{
 				let type = 'device_unknown';
 				switch(true){
@@ -101,6 +102,10 @@ export default function generate(data){
 						$('<div/>', {class:'col s11'})
 							.append($('<i/>', {class:'material-icons left col s1'}).text(type))
 							.append($('<p/>', {class:'col s8'}).text(x.name))
+					).append(
+						$('<label/>', {class:'right col s1'})
+							.append($('<input/>', {class:'filled-in', type:'checkbox'}))
+							.append($('<span/>'))
 					).appendTo(daycard);
 			});
 		}
