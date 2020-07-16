@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   18:42:12, 14-Jul-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 02:40:48, 15-Jul-2020
+* @Last Modified time: 13:05:51, 16-Jul-2020
 */
 
 // File used to generate the curriculum
@@ -11,6 +11,28 @@ import {random} from './utils.js'
 
 // possible colors
 const palette = ["blue", "light-green", "red", "green", "pink", "yellow", "purple"]
+
+// Flatten subfolders by outputting paths
+function flatten(dat) {
+	const flattenRecursive = (data) => {
+		// deep clone so it doesnt affect other stuff
+		data = JSON.parse(JSON.stringify(data));
+		if (data.mimeType === 'application/vnd.google-apps.folder'){
+			// flatten nested
+			const ret = [].concat(...data.data.map(x=>flattenRecursive(x)));
+			for(const d of ret) {
+				d.name = `${data.name} > ${d.name}`;
+			}
+			return ret;
+		}
+		return data;
+	}
+	if (dat.mimeType === 'application/vnd.google-apps.folder'){
+		// flatten nested
+		return [].concat(...dat.data.map(x=>flattenRecursive(x)));
+	}
+	return dat;
+}
 
 // Generate all
 export default function generate(data){
@@ -22,11 +44,12 @@ export default function generate(data){
 		let color = random.choice(palette); // choose a random color
 		const card = $('<div/>', {class:`card col s12 ${color} lighten-4`}).appendTo(container); // create a card
 		$('<h4/>').text(curriculum.name)
-			.appendTo($('<div/>', {class:'card-content'}))
-			.appendTo(card)
+			.appendTo($('<div/>', {class:'card-content'})
+			.appendTo(card))
 
 		const tabs = $('<ul/>', {class:`tabs tabs-fixed-width ${color} lighten-4`})
 			.appendTo($('<div/>', {class:'card-tabs'}).appendTo(card)); // tabs for different days
+		const content = $('<div/>', {class:`card-content ${color} lighten-5`}).appendTo(card);
 		for (const day of curriculum.data) {
 			// ignore file if it isnt a folder
 			if (day.mimeType !== 'application/vnd.google-apps.folder') continue;
@@ -34,164 +57,72 @@ export default function generate(data){
 			// base64 the file id to use as a #id
 			const id = btoa(day.id);
 			$('<a/>', {href:`#${id}`}).text(day.name).appendTo($('<li/>', {class:"tab"}).appendTo(tabs));
+
+			const daycard = $('<div/>', {id:id}).appendTo(content);
+			$('<h4/>', {class:'col s12'}).text(day.name).appendTo($('<div/>', {class:'row'})
+				.css('margin-bottom', '0px'))
+				.prepend(
+					$('<i/>', {class:'material-icons left col s1'})
+						.css('margin-top', '10px')
+						.text('folder')
+				).append(
+					$('<i/>', {class:'material-icons right col s1'})
+						.css('margin-top', '14px').css('margin-right', '-7px')
+						.text('cloud_download')
+				).appendTo(daycard);
+			$('<div/>', {class:'divider'}).appendTo(daycard);
+			$('br').appendTo(daycard);
+			flatten(day).map(x=>{
+				let type = 'device_unknown';
+				switch(true){
+					case /application\/vnd\.google-apps\.folder/.test(x.mimeType):
+						// flatten should kill folders
+						throw new Error("This shouldn't happen!");
+						break;
+					case /application\/vnd\.google-apps\.document/.test(x.mimeType):
+					case /application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document/.test(x.mimeType):
+						type = 'description';
+						break;
+					case /application\/vnd\.google-apps\.presentation/.test(x.mimeType):
+						type = 'slideshow';
+						break;
+					case /application\/vnd\.google-apps\.spreadsheet/.test(x.mimeType):
+						type = 'border_all';
+						break;
+					case /video\/.+/.test(x.mimeType): // videos
+						type = 'movie';
+						break;
+					case /image\/.+/.test(x.mimeType): // images
+						type = 'insert_photo';
+						break;
+				};
+				$('<div/>', {class:'row'})
+					.append(
+						$('<div/>', {class:'col s11'})
+							.append($('<i/>', {class:'material-icons left col s1'}).text(type))
+							.append($('<p/>', {class:'col s8'}).text(x.name))
+					).appendTo(daycard);
+			});
 		}
 	}
 	console.log(container);
 	return container;
 }
 
-// <div class="card col s12 blue lighten-4">
-//           <div class="card-content">
-//             <h4>
-//               Paper/Kultz Class
-//               <p class="right">
-//                 📜
-//                 <i class="material-icons right card-title activator ">more_vert</i>
-//               </p>
-//             </h4>
-//           </div>
-//           <div class="card-reveal blue lighten-5">
-//             <span class="card-title grey-text text-darken-4">Paper/Kultz Class<i class="material-icons right">close</i></span>
-//             <p>
-//               This curriculum is on the Paper and Kultz line of products.
-//               <br><br>
-//             </p>
-//             <div class="chip">
-//               <i class="material-icons right">school</i>
-//               Mariano Castro
-//             </div>
-//             <div class="chip">
-//               Online
-//               <i class="material-icons right">school</i>
-//             </div>
-//           </div>
-//           <div class="card-tabs">
-//             <ul class="tabs tabs-fixed-width blue lighten-4">
-//               <li class="tab"><a href="#pkd1" class="active">Day 1</a></li>
-//               <li class="tab"><a href="#pkd2">Day 2</a></li>
-//               <li class="tab"><a href="#pkd3">Day 3</a></li>
-//               <li class="tab"><a href="#pkd4">Day 4</a></li>
-//               <li class="tab"><a href="#pkd5">Day 5</a></li>
-//             <li class="indicator" style="left: 0px; right: 549px;"></li></ul>
-//           </div>
-//           <div class="card-content blue lighten-5">
-//             <div id="pkd1" class="active">
-//               <div class="row" style="margin-bottom: 0px;">
-//                  <h4 class="col s12">
-//                 <i class="material-icons left col s1" style="margin-top: 10px;">folder</i>
-//                    Day 4
-              
-// <i class="material-icons right col s1" style="margin-top: 14px; margin-right: -7px;">cloud_download</i></h4>
-//               </div>
-             
-             
-
-//               <div class="divider"></div>
-// <br>              
-//               <div class="row"> <!--- this is a doc --->
-//                 <div class="col s11">
-//                   <i class="material-icons left col s1">description</i>
-//                   <p class="col s8">
-//                     Document1
-//                   </p>
-//                 </div>
-
-//                 <form action="#" class="right col s1">
-//                   <label>
-//                     <input type="checkbox" class="filled-in">
-//                     <span></span>
-//                   </label>
-//                 </form>
-//               </div>
-//               <div class="row">
-                
-//                   <!--- presentation --->
-//                   <div class="col s11">
-//                     <i class="material-icons left col s1">slideshow</i>
-//                     <p class="col s8">
-//                       Presentation2
-//                     </p>
-//                   </div>
-
-//                   <form action="#" class="right col s1">
-//                     <label>
-//                       <input type="checkbox" class="filled-in">
-//                       <span> </span>
-//                     </label>
-//                   </form>
-                
-//               </div>
-
-//               <div class="row">
-//                 <!--- video --->
+// <div class=“row”>
+//                 <!--- spreadsheet  --->
 //                 <div>
-//                   <div class="col s11">
-//                     <i class="material-icons left col s1">movie</i>
-//                     <p class="col s8">
-//                       Video3
+//                   <div class=“col s11">
+//                     <i class=“material-icons left col s1”>border_all</i>
+//                     <p class=“col s8">
+//                       spreadsheet
 //                     </p>
 //                   </div>
-
-//                   <form action="#" class="right col s1">
+//                   <form action=“#” class=“right col s1">
 //                     <label>
-//                       <input type="checkbox" class="filled-in">
+//                       <input type=“checkbox” class=“filled-in” />
 //                       <span> </span>
 //                     </label>
 //                   </form>
 //                 </div>
 //               </div>
-//               <div class="row">
-//                   <!--- photo --->
-//                   <div class="col s11">
-//                     <i class="material-icons left col s1">insert_photo</i>
-//                     <p class="col s8">
-//                       Photo4
-//                     </p>
-//                   </div>
-
-//                   <form action="#" class="right col s1">
-//                     <label>
-//                       <input type="checkbox" class="filled-in">
-//                       <span> </span>
-//                     </label>
-//                   </form>
-//               </div>
-//               <div class="row">
-//                 <!--- video --->
-//                 <div class="col s11">
-//                   <i class="material-icons left col s1">movie</i>
-//                   <p class="col s8">
-//                     Video5
-//                   </p>
-//                 </div>
-
-//                 <form action="#" class="right col s1">
-//                   <label>
-//                     <input type="checkbox" class="filled-in">
-//                     <span> </span>
-//                   </label>
-//                 </form>
-//               </div>
-//             </div>
-//             <div class="row">
-//                 <!--- photo --->
-//                 <div class="col s11 ">
-//                   <i class="material-icons left col s1">insert_photo</i>
-//                   <p class="col s8">
-//                     Photo6
-//                   </p>
-//                 </div>
-
-//                 <form action="#" class="right col s1">
-//                   <label>
-//                     <input type="checkbox" class="filled-in">
-//                     <span> </span>
-//                   </label>
-//                 </form>
-//             </div>
-//             <div id="pkd2" style="display: none;">Test 2</div>
-//             <div id="pkd3" style="display: none;">Test 3</div>
-//             <div id="pkd4" style="display: none;">day 4 content</div>
-//             <div id="pkd5" style="display: none;">day 4 content</div>
-//           </div>
-//         </div>
