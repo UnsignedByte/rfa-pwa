@@ -2,7 +2,7 @@
 * @Author: UnsignedByte
 * @Date:   18:42:12, 14-Jul-2020
 * @Last Modified by:   UnsignedByte
-* @Last Modified time: 15:46:58, 16-Jul-2020
+* @Last Modified time: 17:53:05, 16-Jul-2020
 */
 
 // File used to generate the curriculum
@@ -54,7 +54,6 @@ export default function generate(data){
 		for (const day of curriculum.data) {
 			// ignore file if it isnt a folder
 			if (day.mimeType !== 'application/vnd.google-apps.folder') continue;
-			console.log(day.name);
 			// base64 the file id to use as a #id
 			const id = btoa(day.id);
 			$('<a/>', {href:`#${id}`}).text(day.name).appendTo($('<li/>', {class:"tab"}).appendTo(tabs));
